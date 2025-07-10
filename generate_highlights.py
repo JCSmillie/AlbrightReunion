@@ -5,7 +5,7 @@ LIGHTBOX_CSS = "https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/ligh
 LIGHTBOX_JS = "https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"
 
 ROOT_DIR = os.path.dirname(__file__)
-TEMPLATE_STYLE = "style.css"
+TEMPLATE_STYLE = "../style.css"
 INTRO_FILENAME = "intro.txt"
 ATTENTION_IMAGE = "Attention.png"
 
@@ -46,24 +46,47 @@ def get_pdf_links_html():
         '</ul>'
     )
 
+def generate_downloadable_html(year, images, relative_style="../style.css"):
+    items = "\n".join(
+        f'<div style="margin-bottom: 20px;">'
+        f'<img src="{img}" width="300"><br>'
+        f'<a href="{img}" download class="download-link">Download This Photo</a>'
+        f'</div>'
+        for img in images
+    )
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+  <title>{year}th Reunion - All Photos</title>
+  <link rel="stylesheet" href="{relative_style}">
+</head>
+<body>
+  <h1>{year}th Reunion - Full Photo Set</h1>
+  <div class="photo-header">Browse and Download Any Memory</div>
+  {items}
+  <p><a href="../highlights.html">← Back to Highlights</a></p>
+</body>
+</html>"""
+
 def generate_highlights_html(year, images):
-    image_tags = "\n".join(
+    image_blocks = "\n".join(
         f'<a href="gallery/{img}" data-lightbox="{year}th" data-title="Right-click to save">'
-        f'<img src="gallery/{img}" width="300"></a>'
+        f'<img src="gallery/{img}" width="300"></a><br>'
+        f'<a href="gallery/{img}" download class="download-link">Download This Photo</a>'
         for img in images
     )
     return f"""<!DOCTYPE html>
 <html>
 <head>
   <title>{year}th Reunion Highlights</title>
-  <link rel="stylesheet" href="../{TEMPLATE_STYLE}">
+  <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="{LIGHTBOX_CSS}">
 </head>
 <body>
   <h1>{year}th Albright Reunion - Highlights</h1>
   <div class="photo-header">Memories Worth a Thousand Words</div>
-  {image_tags}
-  <p><a href="gallery/">View all photos from the {year}th Reunion</a></p>
+  {image_blocks}
+  <p><a href="gallery/index.html">View all photos from the {year}th Reunion</a></p>
   <p><a href="../index.html">← Back to Home</a></p>
   <script src="{LIGHTBOX_JS}"></script>
 </body>
@@ -78,7 +101,7 @@ def generate_index_html(valid_years, intro_html, attention_html, pdf_html):
 <html>
 <head>
   <title>Albright Reunion Gallery</title>
-  <link rel="stylesheet" href="{TEMPLATE_STYLE}">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Welcome to the Albright Family Reunion Gallery</h1>
@@ -101,20 +124,30 @@ def generate_all_highlights():
         if not os.path.isdir(year_path) or not os.path.isdir(gallery_path):
             continue
 
-        all_images = os.listdir(gallery_path)
-        highlights = [img for img in sorted(all_images) if img.startswith("highlight") and img.lower().endswith(".jpg")]
+        all_images = sorted([
+            img for img in os.listdir(gallery_path)
+            if img.lower().endswith(".jpg")
+        ])
+        highlights = [img for img in all_images if img.startswith("highlight")]
         if "family_group.jpg" in all_images:
             highlights.insert(0, "family_group.jpg")
 
         if not highlights:
             continue
 
+        # Generate highlights.html
         with open(highlights_path, "w") as f:
             f.write(generate_highlights_html(year, highlights))
-        print(f"Generated highlights.html for {year} ({len(highlights)} images)")
+
+        # Generate gallery index.html
+        gallery_index_path = os.path.join(gallery_path, "index.html")
+        with open(gallery_index_path, "w") as f:
+            f.write(generate_downloadable_html(year, all_images, relative_style="../../style.css"))
+
+        print(f"Generated highlights and gallery index for {year} ({len(highlights)} highlights, {len(all_images)} total)")
         valid_years.append(year)
 
-    # Write updated index.html
+    # Update homepage index.html
     if valid_years:
         intro_html = read_intro()
         attention_html = get_attention_image_html()
