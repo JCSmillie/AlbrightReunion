@@ -70,9 +70,11 @@ def generate_downloadable_html(year, images, relative_style="../style.css"):
 
 def generate_highlights_html(year, images):
     image_blocks = "\n".join(
+        f'<div style="margin-bottom: 25px;">'
         f'<a href="gallery/{img}" data-lightbox="{year}th" data-title="Right-click to save">'
         f'<img src="gallery/{img}" width="300"></a><br>'
         f'<a href="gallery/{img}" download class="download-link">Download the Photo Above</a>'
+        f'</div>'
         for img in images
     )
     return f"""<!DOCTYPE html>
