@@ -61,6 +61,7 @@ def generate_highlights_html(year, images):
 </head>
 <body>
   <h1>{year}th Albright Reunion - Highlights</h1>
+  <div class="photo-header">Memories Worth a Thousand Words</div>
   {image_tags}
   <p><a href="gallery/">View all photos from the {year}th Reunion</a></p>
   <p><a href="../index.html">← Back to Home</a></p>
@@ -70,7 +71,7 @@ def generate_highlights_html(year, images):
 
 def generate_index_html(valid_years, intro_html, attention_html, pdf_html):
     links = "\n".join(
-        f'<li><a href="{year}/highlights.html">{year}th Reunion Highlights</a></li>'
+        f'<li><a href="{year}/highlights.html">{year}th Reunion Photos and Other Highlights</a></li>'
         for year in sorted(valid_years, reverse=True)
     )
     return f"""<!DOCTYPE html>
