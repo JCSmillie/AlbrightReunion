@@ -111,7 +111,7 @@ img {
 }
 
 .download-link::before {
-  content: "⬇ ";
+  content: "⬆ ";
   font-size: 1em;
   margin-right: 4px;
 }
